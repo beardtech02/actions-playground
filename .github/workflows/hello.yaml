@@ -1,0 +1,19 @@
+name: Hello World
+
+on:
+  push:
+  workflow_dispatch:   # adds a "Run workflow" button
+
+jobs:
+  say-hello:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Greet
+        run: echo "Hello, GitHub Actions!"
+
+      - name: Show some context
+        run: |
+          echo "Triggered by: ${{ github.event_name }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Runner OS: ${{ runner.os }}"
