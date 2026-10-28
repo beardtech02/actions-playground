@@ -1,0 +1,40 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: mkdir -p dist && echo "build $GITHUB_SHA" > dist/index.html
+      - uses: actions/upload-artifact@v4
+        with: { name: site, path: dist/ }
+
+  deploy-staging:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.example.com
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: site, path: dist/ }
+      - run: echo "Deploying to staging with token length ${#DEPLOY_TOKEN}"
+        env:
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+
+  deploy-production:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://example.com
+    concurrency: production          # never two prod deploys at once
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: site, path: dist/ }
+      - run: echo "Deploying to production"
